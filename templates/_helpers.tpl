@@ -24,7 +24,7 @@ docker:
   username: {{ .Values.docker.username }}
 embedded_ip: true
 k8s_namespace: {{ .Release.Namespace }}
-namespace: {{ .Values.namespace }}
+namespace: {{ .Values.octarine_namespace }}
 restful_report: false
 service_version: "1.0"
 use_octarine_encryption: true
@@ -33,17 +33,33 @@ version_tag: {{ .Values.version_tag }}
 {{- end -}}
 
 {{- define "octarine-install" -}}
-# Install kubectl
-sudo apt-get update && sudo apt-get install -y apt-transport-https
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
-sudo apt-get update
-sudo apt-get install -y kubectl
-
 # Login and bootstrap idcontroller
-/octactl login --namespace {{ .Values.namespace }} --port 443 --server {{ .Values.api_host }} --username {{ .Values.user }} --password {{ .Values.password }}
-/octactl idcontroller k8s --k8s-namespace {{ .Release.Namespace }} -t {{ .Values.version_tag }} -w /etc/octarine/octarine_docker_credentials {{ .Values.deployment }} | kubectl apply -f -
-sleep 300000000
+octactl config docker.email {{ .Values.docker.email }}
+octactl config docker.username {{ .Values.docker.username }}
+octactl config docker.password {{ .Values.docker.password }}
+octactl login --namespace {{ .Values.octarine_namespace }} --api_port 443 --api_host {{ .Values.api_host }} --user {{ .Values.user }} --password {{ .Values.password }}
+octactl deployment create {{ .Values.deployment }}
+octactl idcontroller {{ .Values.deployment }} --k8s-namespace {{ .Release.Namespace }} -t {{ .Values.version_tag }} | kubectl apply -f -
+octactl sidecar-injector sidecar-injector-{{ .Values.deployment }} {{ .Values.deployment }} --k8s-namespace {{ .Release.Namespace }} --idcontroller-host idcontroller.{{ .Release.Namespace }} | kubectl apply -f -
+{{- range .Values.k8s_namespaces }}
+octactl sidecar-injector enable --k8s-namespace {{ . }}
+{{- end }}
+{{- end -}}
+
+{{- define "octarine-cleanup" -}}
+# Login and bootstrap idcontroller
+octactl config docker.email {{ .Values.docker.email }}
+octactl config docker.username {{ .Values.docker.username }}
+octactl config docker.password {{ .Values.docker.password }}
+octactl login --namespace {{ .Values.octarine_namespace }} --api_port 443 --api_host {{ .Values.api_host }} --user {{ .Values.user }} --password {{ .Values.password }}
+octactl deployment delete {{ .Values.deployment }}
+{{- range .Values.k8s_namespaces }}
+octactl sidecar-injector disable --k8s-namespace {{ . }}
+{{- end }}
+kubectl delete mutatingwebhookconfiguration octarine-sidecar-injector
+octactl sidecar-injector sidecar-injector-{{ .Values.deployment }} {{ .Values.deployment }} --k8s-namespace {{ .Release.Namespace }} --idcontroller-host idcontroller.{{ .Release.Namespace }} | kubectl delete -f -
+kubectl delete deployment octarine-sidecar-injector --namespace {{ .Release.Namespace }}
+octactl idcontroller {{ .Values.deployment }} --k8s-namespace {{ .Release.Namespace }} -t {{ .Values.version_tag }} | kubectl delete -f -
 {{- end -}}
 
 
