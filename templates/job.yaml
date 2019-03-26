@@ -32,7 +32,7 @@ spec:
       restartPolicy: {{ .Values.restartPolicy | default "Never" }}
       containers:
         - name: octactl-bootstrap
-          image: "octarinesec/octactl-container:{{ default "0.9.5" .Values.octactl_tag }}"
+          image: "octarinesec/octactl-container:{{ .Values.version_tag }}"
           command: ["/bin/bash", "/etc/octarine/octarine-install.sh" ]
           volumeMounts:
             - mountPath: /etc/octarine
@@ -79,7 +79,7 @@ spec:
       restartPolicy: {{ .Values.restartPolicy | default "Never" }}
       containers:
         - name: octactl-cleanup
-          image: "octarinesec/octactl-container:{{ default "0.9.5" .Values.octactl_tag }}"
+          image: "octarinesec/octactl-container:{{ .Values.version_tag }}"
           command: ["/bin/bash", "/etc/octarine/octarine-cleanup.sh" ]
           volumeMounts:
             - mountPath: /etc/octarine
