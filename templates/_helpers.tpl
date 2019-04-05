@@ -37,6 +37,7 @@ version_tag: {{ .Values.version_tag }}
 octactl config docker.email {{ .Values.docker.email }}
 octactl config docker.username {{ .Values.docker.username }}
 octactl config docker.password {{ .Values.docker.password }}
+octactl config use_quotas {{ default "true" .Values.use_quotas }}
 octactl login --namespace {{ .Values.octarine_namespace }} --api_port 443 --api_host {{ .Values.api_host }} --user {{ .Values.user }} --password {{ .Values.password }}
 octactl deployment create {{ .Values.deployment }}
 octactl idcontroller {{ .Values.deployment }} --k8s-namespace {{ .Release.Namespace }} -t {{ .Values.version_tag }} | kubectl apply -f -

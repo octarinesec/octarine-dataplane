@@ -1,28 +1,31 @@
-#api_host: 35.203.154.214
-#docker:
-#  email: openx@octarinesec.com
-#  password:
-#  username: octarineopenx
-#octarine_namespace: openx
-# List of namespaces where sidecar-injector is enabled
-#k8s_namespaces:
-#  - default
-#  - ivan-test
-#user: pillar2tiller
-#password: 
-#version_tag: 0.9.5
-# Octarine deployment name
-#deployment: "devint:ox-delivery-devint-2-us-east4"
+# [Required] Address of Octarine control plane
+api_host:
 
+# [Required] Docker Hub credentials required to download Octarine software
+docker:
+  email: customerX@octarinesec.com
+  password:
+  username: customerX
 
-#resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
+# [Required] List of namespaces where sidecar-injector is enabled
+k8s_namespaces:
+  - default
+
+# [Required] Octarine namespace to use, not to be confused with Kubernetes namespace
+octarine_namespace: customerX
+
+# [Required] Username for Octarine control plane
+user: pillar2tiller
+
+# [Required] Passoword for Octarine control plane
+password:
+
+# [Required] Octarine version to deploy
+version_tag: 0.10.0
+
+# [Required] Name of deployment in form of <group>:<member>
+deployment:
+
+# [Optional] Enable setting resource requests and limits for Kubernetes compute resources
+# Default: true
+use_quotas:
